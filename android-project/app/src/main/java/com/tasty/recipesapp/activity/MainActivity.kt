@@ -2,7 +2,14 @@ package com.tasty.recipesapp.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.PopupMenu
 import androidx.fragment.app.Fragment
+import androidx.navigation.NavController
+import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.tasty.recipesapp.R
 import com.tasty.recipesapp.databinding.ActivityMainBinding
 import com.tasty.recipesapp.ui.home.HomeFragment
@@ -16,26 +23,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        replaceFragment(HomeFragment())
-
-        binding.bottomNavigationView.setOnItemSelectedListener {
-            when (it.itemId) {
-                R.id.homeFragment -> replaceFragment(HomeFragment())
-                R.id.profileFragment -> replaceFragment(ProfileFragment())
-                R.id.recipesFragment -> replaceFragment(RecipesFragment())
-                else -> {
-                }
-
-            }
-            true
-        }
+        setupNavigation()
     }
 
-    private fun replaceFragment(fragment: Fragment){
-        val fragmentManager = supportFragmentManager
-        val fragmentTransaction = fragmentManager.beginTransaction()
-        fragmentTransaction.replace(R.id.frame_layout, fragment)
-        fragmentTransaction.addToBackStack(null) // Optional, adds fragment to back stack
-        fragmentTransaction.commit()
+    private fun setupNavigation(){
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        val navController = navHostFragment.navController
+        val navView: BottomNavigationView = binding.bottomNavigationView
+
+        navView.setupWithNavController(navController)
     }
+
+
+
 }
