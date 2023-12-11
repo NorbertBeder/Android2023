@@ -1,60 +1,109 @@
 package com.tasty.recipesapp.ui.recipe
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.tasty.recipesapp.R
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.squareup.picasso.MemoryPolicy
+import com.squareup.picasso.Picasso
+import com.tasty.recipesapp.data.dtos.ComponentDTO
+import com.tasty.recipesapp.data.dtos.InstructionDTO
+import com.tasty.recipesapp.data.dtos.NutritionDTO
+import com.tasty.recipesapp.data.dtos.RecipeDTO
+import com.tasty.recipesapp.data.dtos.UserRatingsDTO
+import com.tasty.recipesapp.databinding.FragmentRecipeDetailBinding
+import com.tasty.recipesapp.ui.adapters.InstructionAdapter
+import com.tasty.recipesapp.viewModel.RecipeDetailsViewModel
+import com.tasty.recipesapp.ui.adapters.IngredientsAdapter
+import kotlinx.coroutines.launch
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [RecipeDetailFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class RecipeDetailFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private var _binding: FragmentRecipeDetailBinding? = null
+    private val binding get() = _binding!!
+
+    private val viewModel: RecipeDetailsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
+
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recipe_detail, container, false)
+        _binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
+        val view = binding.root
+
+        var recipeId = arguments?.getInt("recipeId") ?: -1
+        var recipe: RecipeDTO?
+
+        if (recipeId == 0) {
+            recipeId = arguments?.getInt("internalId") ?: -1
+            viewLifecycleOwner.lifecycleScope.launch {
+                recipe = viewModel.ownRecipeDetail(recipeId.toLong())
+                Log.d(TAG, "1 $recipe")
+
+            }
+        } else {
+            recipe = viewModel.fetchRecipeDetail(recipeId, requireContext())
+
+        }
+
+
+
+        viewModel.recipe.observe(viewLifecycleOwner) { recipe ->
+            recipe?.let {
+                updateRecipeDetails(it)
+                setupInstructionRecyclerView(it)
+                setupIngredientsRecyclerView(it)
+            }
+        }
+
+
+        return view
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment RecipeDetailFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            RecipeDetailFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+    private fun updateRecipeDetails(recipe: RecipeDTO) {
+        Picasso.get().load(recipe.image)
+            .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+            .into(binding.detailImage)
+        binding.detailTitle.text = recipe.name
+        binding.fatView.text = recipe.nutrition?.fat.toString()
+        binding.fiberView.text = recipe.nutrition?.fiber.toString()
+        binding.proteinView.text = recipe.nutrition?.protein.toString()
+        binding.sugarView.text = recipe.nutrition?.sugar.toString()
+        binding.caloriesView.text = recipe.nutrition?.calories.toString()
+        binding.carbohydratesView.text = recipe.nutrition?.carbohydrates.toString()
+    }
+
+    private fun setupInstructionRecyclerView(recipe: RecipeDTO) {
+        val instructionAdapter = recipe.instructions?.let {
+            InstructionAdapter(it)
+        }
+        binding.instructionRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = instructionAdapter
+        }
+    }
+
+    private fun setupIngredientsRecyclerView(recipe: RecipeDTO) {
+        val allComponents = recipe.sections?.flatMap { it.components.orEmpty() } ?: emptyList()
+        val ingredientAdapter = IngredientsAdapter(allComponents)
+        binding.ingredientsRecyclerView.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = ingredientAdapter
+        }
+    }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -4,9 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 data class InstructionDTO(
     @SerializedName("display_text")
-    val displayText: String,
+    val displayText: String?,
     @SerializedName("start_time")
-    val startTime: Int,
+    val startTime: Int?,
     @SerializedName("end_time")
-    val endTime: Int
+    val endTime: Int?,
+    val position: Int?
 )
