@@ -5,15 +5,18 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.tasty.recipesapp.data.dtos.RecipeDTO
 import com.tasty.recipesapp.db.entities.RecipeEntity
 import com.tasty.recipesapp.repo.RepositoryProvider
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 
 class RecipeDetailsViewModel: ViewModel() {
     var recipe:MutableLiveData<RecipeDTO> = MutableLiveData()
     private val recipeRepository = RepositoryProvider.recipeRepository
+    
     fun fetchRecipeDetail(recipeId:Int, context: Context): RecipeDTO? {
         val recipe = recipeRepository.getRecipe(context, recipeId)
 
@@ -22,6 +25,12 @@ class RecipeDetailsViewModel: ViewModel() {
         return recipe
     }
 
+    fun getRecipeDetailFromApi(recipeId: Int) {
+        viewModelScope.launch {
+            val result = recipeRepository.getRecipeByIdFromApi(recipeId.toString())
+            recipe.value = result
+        }
+    }
     suspend fun ownRecipeDetail(internalId: Long): RecipeDTO? {
         val recipe = recipeRepository.getRecipeById(internalId)
         val jsonObject = recipe?.json?.let { JSONObject(it) }

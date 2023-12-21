@@ -8,6 +8,7 @@ import com.google.gson.annotations.SerializedName
 data class RecipeEntity(
     @PrimaryKey(autoGenerate = true)
     val internalId: Long = 0L, // Room will handle generating this ID
+    val userId : Long,
     @SerializedName("json_data")
     val json: String
 )

@@ -34,7 +34,7 @@ class RecipesFragment : Fragment(), RecipeListAdapter.OnRecipeClickListener {
         val viewModel: RecipeListViewModel by viewModels()
 
 
-        val recipes: Array<RecipeModel> = emptyArray()
+        val recipes: List<RecipeModel> = emptyList()
         val myAdapter = RecipeListAdapter(recipes, this)
         binding.recipeList.layoutManager = LinearLayoutManager(context)
         binding.recipeList.adapter = myAdapter
@@ -46,8 +46,7 @@ class RecipesFragment : Fragment(), RecipeListAdapter.OnRecipeClickListener {
             myAdapter.notifyDataSetChanged()
         }
 
-        context?.let { viewModel.readAllRecipes(it) }
-        // Inflate the layout for this fragment
+        context?.let { viewModel.getAllRecipesFromApi() }
         return view
     }
 

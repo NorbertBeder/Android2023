@@ -26,6 +26,7 @@ import com.tasty.recipesapp.data.dtos.SectionDTO
 import com.tasty.recipesapp.data.dtos.UserRatingsDTO
 import com.tasty.recipesapp.databinding.FragmentNewRecipeBinding
 import com.tasty.recipesapp.db.entities.RecipeEntity
+import com.tasty.recipesapp.ui.home.Preferences
 import com.tasty.recipesapp.viewModel.ProfileViewModel
 
 class NewRecipeFragment : Fragment() {
@@ -124,12 +125,12 @@ class NewRecipeFragment : Fragment() {
                 }
             }
 
-            val fat = fatText?.toIntOrNull() ?: 0
-            val fiber = fiberText?.toIntOrNull() ?: 0
-            val protein = proteinText?.toIntOrNull() ?: 0
-            val sugar = sugarText?.toIntOrNull() ?: 0
-            val calories = caloriesText?.toIntOrNull() ?: 0
-            val carbohydrates = carbohydratesText?.toIntOrNull() ?: 0
+            val fat = fatText.toIntOrNull() ?: 0
+            val fiber = fiberText.toIntOrNull() ?: 0
+            val protein = proteinText.toIntOrNull() ?: 0
+            val sugar = sugarText.toIntOrNull() ?: 0
+            val calories = caloriesText.toIntOrNull() ?: 0
+            val carbohydrates = carbohydratesText.toIntOrNull() ?: 0
 
             val nutritionDTO = NutritionDTO(fat, fiber, protein, sugar, calories, carbohydrates)
             val sectionsList = listOf(SectionDTO(components = componentList))
@@ -140,8 +141,16 @@ class NewRecipeFragment : Fragment() {
 
 
             if (name.isNotEmpty() && description.isNotEmpty() && pictureUrl.isNotEmpty() && componentList.isNotEmpty()) {
-                val newRecipe = RecipeEntity(json = jsonData)
-                viewModel.insertRecipe(newRecipe)
+                val context = requireContext()
+
+                val appPreferences = Preferences(context)
+
+                val userId = appPreferences.userId
+
+                val newRecipe = userId?.let { it1 -> RecipeEntity(userId = it1, json = jsonData) }
+                if (newRecipe != null) {
+                    viewModel.insertRecipe(newRecipe)
+                }
 
                 findNavController().navigateUp()
             } else {

@@ -38,7 +38,7 @@ class RecipeDetailFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentRecipeDetailBinding.inflate(inflater, container, false)
         val view = binding.root
 
@@ -50,14 +50,11 @@ class RecipeDetailFragment : Fragment() {
             viewLifecycleOwner.lifecycleScope.launch {
                 recipe = viewModel.ownRecipeDetail(recipeId.toLong())
                 Log.d(TAG, "1 $recipe")
-
             }
         } else {
-            recipe = viewModel.fetchRecipeDetail(recipeId, requireContext())
+           viewModel.getRecipeDetailFromApi(recipeId)
 
         }
-
-
 
         viewModel.recipe.observe(viewLifecycleOwner) { recipe ->
             recipe?.let {

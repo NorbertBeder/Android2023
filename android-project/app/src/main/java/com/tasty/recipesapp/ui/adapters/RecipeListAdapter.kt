@@ -1,5 +1,7 @@
 package com.tasty.recipesapp.ui.adapters
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +15,7 @@ import com.tasty.recipesapp.R
 import com.tasty.recipesapp.data.models.RecipeModel
 
 class RecipeListAdapter(
-    var recipes: Array<RecipeModel>, private var onRecipeClickListener: OnRecipeClickListener): RecyclerView.Adapter<RecipeListAdapter.ViewHolder>() {
+    var recipes: List<RecipeModel>, private var onRecipeClickListener: OnRecipeClickListener): RecyclerView.Adapter<RecipeListAdapter.ViewHolder>() {
     interface OnRecipeClickListener {
         fun onRecipeClick(recipeId: Int)
     }
@@ -54,6 +56,7 @@ class RecipeListAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val recipe = recipes[position]
+        Log.d(TAG, recipe.toString())
         Picasso.get().load(recipe.image).memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE).into(holder.image)
 
         holder.title.text = recipe.title

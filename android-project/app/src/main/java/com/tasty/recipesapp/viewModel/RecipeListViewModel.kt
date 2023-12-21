@@ -12,19 +12,35 @@ import com.tasty.recipesapp.data.mappers.UserRatingsMapper.Companion.toModel
 import com.tasty.recipesapp.data.models.RecipeModel
 import com.tasty.recipesapp.repo.RecipeRepository
 import com.tasty.recipesapp.repo.RepositoryProvider
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RecipeListViewModel: ViewModel() {
-    val liveData = MutableLiveData<Array<RecipeModel>>()
+    val liveData = MutableLiveData<List<RecipeModel>>()
     private val recipeRepository = RepositoryProvider.recipeRepository
 
-    fun readAllRecipes(context: Context){
+//    fun readAllRecipes(context: Context){
+//        viewModelScope.launch {
+//            val list = recipeRepository.readRecipes(context)
+//            val models = list.map{
+//                        RecipeModel(it.id, it.name, it.instructions?.toModelList(), it.sections?.toModelList(), it.image, it.description, it.rating?.toModel())
+//            }
+//            liveData.value = models.toTypedArray()
+//        }
+//    }
+
+    fun getAllRecipesFromApi() {
         viewModelScope.launch {
-            val list = recipeRepository.readRecipes(context)
-            val models = list.map{
-                        RecipeModel(it.id, it.name, it.instructions?.toModelList(), it.sections?.toModelList(), it.image, it.description, it.rating?.toModel())
+//            val recipes = RepositoryProvider.recipeRepository.getRecipesFromApi("0", "15")
+//            recipes.forEach {
+//                Log.d("RECIPE_API", it.toString())
+//            }
+
+            val recipes = withContext(Dispatchers.IO){
+                recipeRepository.getRecipesFromApi("0","50")
             }
-            liveData.value = models.toTypedArray()
+            liveData.value=recipes
         }
     }
 }

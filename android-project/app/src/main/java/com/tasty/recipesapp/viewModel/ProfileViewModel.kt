@@ -4,6 +4,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tasty.recipesapp.data.mappers.InstructionMapper.Companion.toModelList
+import com.tasty.recipesapp.data.mappers.RecipeMapper.Companion.toModelList
 import com.tasty.recipesapp.data.mappers.SectionsMapper.Companion.toModelList
 import com.tasty.recipesapp.data.mappers.UserRatingsMapper.Companion.toModel
 import com.tasty.recipesapp.data.models.RecipeModel
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel : ViewModel() {
     private val repository: RecipeRepository = RepositoryProvider.recipeRepository
-    val liveData = MutableLiveData<Array<RecipeModel>>()
+    val liveData = MutableLiveData<List<RecipeModel>>()
 
     fun deleteRecipeById(recipeID: Long){
         viewModelScope.launch {
@@ -32,21 +33,16 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    fun getAllRecipes() {
+    fun deleteAllRecipes(){
         viewModelScope.launch {
-            val list = repository.getAllRecipes()
-            val models = list.map {
-                RecipeModel(
-                    it.id,
-                    it.name,
-                    it.instructions?.toModelList(),
-                    it.sections?.toModelList(),
-                    it.image,
-                    it.description,
-                    it.rating?.toModel()
-                )
-            }
-            liveData.value = models.toTypedArray()
+            repository.deleteAllRecipes()
+        }
+    }
+
+    fun getAllRecipes(userId: Long) {
+        viewModelScope.launch {
+            val list = repository.getAllRecipes(userId)
+            liveData.value = list.toModelList()
         }
     }
 
